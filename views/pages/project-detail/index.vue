@@ -165,7 +165,27 @@ export default {
             </tag>
           }
         },
-        { title: 'URL', width: 420, ellipsis: true, sortable: true, key: 'url' },
+        {
+          title: 'URL',
+          width: 420,
+          ellipsis: true,
+          sortable: true,
+          key: 'url',
+          filters: [1].map(none => {
+            let set = new Set()
+            console.log(1)
+            this.$store.state.mock.list.map(item => {
+              let key = item.url.split('/')[2]
+              set.add(key)
+            })
+            return [...set].map(item => {
+              return { label: item, value: item }
+            })
+          })[0],
+          filterMethod (value, row) {
+            return row.url.indexOf(value) > -1
+          }
+        },
         { title: this.$t('p.detail.columns[0]'), ellipsis: true, key: 'description' },
         {
           title: this.$t('p.detail.columns[1]'),
