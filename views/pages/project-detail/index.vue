@@ -183,7 +183,7 @@ export default {
             })
           })[0],
           filterMethod (value, row) {
-            return row.url.indexOf(value) > -1
+            return row.url.indexOf(`/${value}/`) > -1
           }
         },
         { title: this.$t('p.detail.columns[0]'), ellipsis: true, key: 'description' },

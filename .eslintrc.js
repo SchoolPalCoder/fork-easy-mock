@@ -9,5 +9,8 @@ module.exports = {
   },
   "plugins": [
     "html"
-  ]
+  ],
+  "rule":{
+    "indent":0
+  }
 };
