@@ -111,7 +111,7 @@ ${JSON.parse(_mock.parameters).map(i => { return `      * @param {${i.required ?
             return net.fetch('${_mock.url}',{
                   method:'${_mock.method}',
                   ${_mock.method === 'post' ? `data:${JSON.parse(_mock.parameters).map(i => { return i.name })}` : queryParam + '\n' + bodyParam}
-            }
+            })
       }
 }
         `
