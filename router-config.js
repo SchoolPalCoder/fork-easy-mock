@@ -2,7 +2,7 @@
 
 const config = require('config')
 const Router = require('koa-router')
-const restc = require('restc').koa2()
+const restc = require('restc').koa2()// 接口可视化请求
 const ratelimit = require('koa-ratelimit')
 const {
   user,
@@ -16,8 +16,8 @@ const baseUtil = require('./util')
 const middleware = require('./middlewares')
 
 const rateLimitConf = config.get('rateLimit')
-const apiRouter = new Router({ prefix: '/api' })
-const mockRouter = new Router({ prefix: '/mock' })
+const apiRouter = new Router({ prefix: '/api' })// easy-mock获取接口数据的路由
+const mockRouter = new Router({ prefix: '/mock' })// easy-mock转发mock的路由
 const rate = ratelimit({
   db: baseUtil.getRedis(),
   id: ctx => ctx.url,

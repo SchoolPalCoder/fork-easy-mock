@@ -41,6 +41,7 @@ module.exports = class Middleware {
     return next()
   }
 
+  // ban掉从config中取出的被ban掉的ip
   static ipFilter (ctx, next) {
     if (ipFilter(ctx.ip, blackIPs, {strict: false})) {
       ctx.body = utilFn.refail('请求频率太快，已被限制访问')
@@ -48,7 +49,7 @@ module.exports = class Middleware {
     }
     return next()
   }
-
+  // ban掉从config中取出的被ban掉的projectId，返回项目projectId和实际要代理的接口地址
   static mockFilter (ctx, next) {
     const pathNode = pathToRegexp('/mock/:projectId(.{24})/:mockURL*').exec(ctx.path)
 

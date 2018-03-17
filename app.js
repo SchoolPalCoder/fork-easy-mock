@@ -47,9 +47,9 @@ app
     return true
   }))
   .use(koaBody({ multipart: true }))
-  .use(routerConfig.mock.routes())
+  .use(routerConfig.mock.routes())// easy-mock转发mock的路由
   .use(routerConfig.mock.allowedMethods())
-  .use(routerConfig.api.routes())
+  .use(routerConfig.api.routes())// easy-mock获取接口数据的路由
   .use(routerConfig.api.allowedMethods())
 
 app.proxy = config.get('proxy')
