@@ -27,7 +27,7 @@ async function createMock (projectId, swaggerDocs) {
 
       const operation = paths[url][method]
       const desc = operation.summary || /* istanbul ignore next */ operation.description
-      const api = _.find(apis, { method, url: fullAPIPath })
+      const api = _.find(apis, { method, url: fullAPIPath }) // 同步时判断api是否存在的一句是method 和url 是否一致
       const mode = _.get(operation, 'responses["200"].example') || _.get(operation, 'responses["default"].example') || '{}'
       let responseModel, parameters
 
@@ -69,7 +69,7 @@ async function createMock (projectId, swaggerDocs) {
       newKeys = newKeys.filter(key => !/\[[1-9]\d*\]/.test(key))
       oldKeys = oldKeys.filter(key => !/\[[1-9]\d*\]/.test(key)) // [ 'data[0].item', 'data[1].item', 'data[2].item' ] => [ 'data[0]____item' ]
         .map(o => o.replace(/\|[^_\[]*(__)?/g, '$1')) // 'data|1-10.item' => 'data____item' 'data|1-10[0].item' => 'data[0]____item'
-      api.mode = _.xor(newKeys, oldKeys).length > 0 ? /* istanbul ignore next */ mode : api.mode
+      api.mode = _.xor(newKeys, oldKeys).length > 0 ? /* istanbul ignore next */ mode : api.mode // 同步后接口有变动，以新的接口结构为准，这里的变动主要为对象属性是否有删改，不关心值本身
 
       oldAPIs.push(api)
     }

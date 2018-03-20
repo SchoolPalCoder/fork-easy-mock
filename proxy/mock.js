@@ -1,5 +1,5 @@
 'use strict'
-
+/* 从mongoDB对mock数据的增删改查操作 */
 const { Mock } = require('../models')
 
 module.exports = class MockProxy {
@@ -28,6 +28,7 @@ module.exports = class MockProxy {
         mode: mock.mode,
         method: mock.method,
         parameters: mock.parameters,
+        useMockData: mock.useMockData,
         description: mock.description,
         response_model: mock.response_model
       }

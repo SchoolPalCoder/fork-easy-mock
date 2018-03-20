@@ -117,12 +117,14 @@ export default {
           this.temp.mode = this.value.mode
           this.temp.method = this.value.method
           this.temp.description = this.value.description
+          this.temp.useMockData = this.value.useMockData
           this.codeEditor.setValue(this.temp.mode)
         } else {
           this.temp.url = ''
           this.temp.mode = '{"data": {}}'
           this.temp.method = 'get'
           this.temp.description = ''
+          this.temp.useMockData = true
           this.codeEditor.setValue(this.temp.mode)
         }
         this.format()

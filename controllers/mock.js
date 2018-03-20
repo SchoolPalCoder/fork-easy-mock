@@ -58,6 +58,7 @@ module.exports = class MockController {
     const description = ctx.checkBody('description').notEmpty().value
     const url = ctx.checkBody('url').notEmpty().match(/^\/.*$/i, 'URL 必须以 / 开头').value
     const method = ctx.checkBody('method').notEmpty().toLow().in(['get', 'post', 'put', 'delete', 'patch']).value
+    const useMockData = true
 
     if (ctx.errors) {
       ctx.body = ctx.util.refail(null, 10001, ctx.errors)
@@ -86,6 +87,7 @@ module.exports = class MockController {
       project: projectId,
       description,
       method,
+      useMockData,
       url,
       mode
     })
@@ -143,7 +145,7 @@ module.exports = class MockController {
       project.user = _.pick(project.user, ft.user)
       project = _.pick(project, ['user'].concat(ft.project))
     }
-
+    // 接口返回 models/field_table定义的数据结构
     mocks = mocks.map(o => _.pick(o, ft.mock))
 
     ctx.body = ctx.util.resuccess({ project: project || {}, mocks })
@@ -158,9 +160,10 @@ module.exports = class MockController {
     const uid = ctx.state.user.id
     const id = ctx.checkBody('id').notEmpty().value
     const mode = ctx.checkBody('mode').notEmpty().value
-    const description = ctx.checkBody('description').notEmpty().value
+    const description = ctx.checkBody('description').value
     const url = ctx.checkBody('url').notEmpty().match(/^\/.*$/i, 'URL 必须以 / 开头').value
     const method = ctx.checkBody('method').notEmpty().toLow().in(['get', 'post', 'put', 'delete', 'patch']).value
+    const useMockData = (typeof ctx.checkBody('useMockData').value === 'boolean') ? ctx.checkBody('useMockData').value : true
 
     if (ctx.errors) {
       ctx.body = ctx.util.refail(null, 10001, ctx.errors)
@@ -180,6 +183,7 @@ module.exports = class MockController {
     api.mode = mode
     api.method = method
     api.description = description
+    api.useMockData = useMockData
 
     const existMock = await MockProxy.findOne({
       _id: { $ne: api.id },
@@ -216,6 +220,7 @@ module.exports = class MockController {
     if (apis) {
       apis = JSON.parse(apis)
     } else {
+      // 找到mongoDB中的项目中所有的mock api数据并缓存30分钟
       apis = await MockProxy.find({ project: projectId })
       if (apis[0]) await redis.set(redisKey, JSON.stringify(apis), 'EX', 60 * 30)
     }
@@ -294,12 +299,44 @@ module.exports = class MockController {
     }
 
     await redis.lpush('mock.count', api._id)
+
+    /**
+     * 返回mock数据 Jsonp or Mockjs Data
+     * **/
+
     if (jsonpCallback) {
       ctx.type = 'text/javascript'
       ctx.body = `${jsonpCallback}(${JSON.stringify(apiData, null, 2)})`
         .replace(/\u2028/g, '\\u2028')
         .replace(/\u2029/g, '\\u2029') // JSON parse vs eval fix. https://github.com/rack/rack-contrib/pull/37
     } else {
+      // 返回接口数据
+      // console.log(ctx, api)
+
+      // 使用mock数据返回mock数据
+      if (api.useMockData === true) {
+        ctx.body = apiData
+        return false
+      } else { // 不使用mock数据做原有链接的重定向
+        var reg = /https?:\/\/[^/?]*/ // 匹配swagger后端服务器的域名
+        try {
+          apiData = await axios({
+            method: method,
+            url: `${api.project.swagger_url.match(reg)[0]}${mockURL}`,
+            params: _.assign({}, ctx.query),
+            headers: _.assign({}, ctx.headers),
+            data: body,
+            timeout: 10000 // 接口转发时间最多10秒
+          }).then(res => {
+            let cookies = res.headers['set-cookie']
+            cookies && cookies.length && ctx.set('Set-Cookie', res.headers['set-cookie'])
+            return res.data
+          })
+        } catch (error) {
+          ctx.body = ctx.util.refail(error.message || '接口请求失败')
+          return
+        }
+      }
       ctx.body = apiData
     }
   }

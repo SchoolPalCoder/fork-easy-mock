@@ -31,6 +31,7 @@ const rate = ratelimit({
   }
 })
 
+// ⬇和 router.redirect('*', 'sign-in');
 exports.mock = mockRouter
   .all('*', middleware.mockFilter, rate, restc, mock.getMockAPI)
 

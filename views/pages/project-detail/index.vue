@@ -167,6 +167,35 @@ export default {
         },
         { title: 'URL', width: 420, ellipsis: true, sortable: true, key: 'url' },
         { title: this.$t('p.detail.columns[0]'), ellipsis: true, key: 'description' },
+        { title: '使用mock',
+          width: 110,
+          align: 'center',
+          key: 'switch',
+          render: (h, params) => {
+            return h('i-switch', {
+              props: {
+                size: 'large',
+                value: params.row.useMockData
+              },
+              on: {
+                'on-change': status => { this.switchUseMockHandle(status, params.row) }
+              }
+            }, [
+              h('span', {
+                slot: 'open',
+                domProps: {
+                  innerHTML: 'ON'
+                }
+              }),
+              h('span', {
+                slot: 'close',
+                domProps: {
+                  innerHTML: 'OFF'
+                }
+              })
+            ])
+          }
+        },
         {
           title: this.$t('p.detail.columns[1]'),
           key: 'action',
@@ -200,6 +229,7 @@ export default {
     return store.dispatch('mock/FETCH', route)
   },
   mounted () {
+    // 搜索数据时发送query事件
     this.$on('query', debounce((keywords) => {
       this.keywords = keywords
     }, 500))
@@ -211,6 +241,8 @@ export default {
     list () {
       const list = this.$store.state.mock.list
       const reg = this.keywords && new RegExp(this.keywords, 'i')
+
+      // 根据当前搜索结果中是否包含 name、url、method 返回接口列表数据
       return reg
         ? list.filter(item => (
           reg.test(item.name) || reg.test(item.url) || reg.test(item.method)
@@ -252,6 +284,27 @@ export default {
     },
     preview (mock) {
       window.open(this.baseUrl + mock.url + '#!method=' + mock.method)
+    },
+    // 切换mock开关
+    switchUseMockHandle (status, mock) {
+      mock.useMockData = status
+      api.mock.update({
+        data: {
+          mode: mock.mode,
+          description: mock.description,
+          method: mock.method,
+          useMockData: status,
+          id: mock._id,
+          url: mock.url
+        }
+      }).then(res => {
+        if (res.data.success) {
+          this.$Message.success('修改成功')
+        } else {
+          this.$Message.success('修改失败')
+          this.$store.dispatch('mock/FETCH', this.$route)
+        }
+      })
     },
     selectionChange (selection) {
       this.selection = selection
