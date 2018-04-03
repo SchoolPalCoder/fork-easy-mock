@@ -58,7 +58,6 @@ module.exports = class MockController {
     const description = ctx.checkBody('description').notEmpty().value
     const url = ctx.checkBody('url').notEmpty().match(/^\/.*$/i, 'URL 必须以 / 开头').value
     const method = ctx.checkBody('method').notEmpty().toLow().in(['get', 'post', 'put', 'delete', 'patch']).value
-    const useMockData = true
 
     if (ctx.errors) {
       ctx.body = ctx.util.refail(null, 10001, ctx.errors)
@@ -87,7 +86,6 @@ module.exports = class MockController {
       project: projectId,
       description,
       method,
-      useMockData,
       url,
       mode
     })
@@ -160,10 +158,12 @@ module.exports = class MockController {
     const uid = ctx.state.user.id
     const id = ctx.checkBody('id').notEmpty().value
     const mode = ctx.checkBody('mode').notEmpty().value
-    const description = ctx.checkBody('description').value
     const url = ctx.checkBody('url').notEmpty().match(/^\/.*$/i, 'URL 必须以 / 开头').value
     const method = ctx.checkBody('method').notEmpty().toLow().in(['get', 'post', 'put', 'delete', 'patch']).value
-    const useMockData = (typeof ctx.checkBody('useMockData').value === 'boolean') ? ctx.checkBody('useMockData').value : true
+    const description = ctx.checkBody('description').value
+    const useMockData = ctx.checkBody('useMockData').value
+    const confirmMode = ctx.checkBody('confirm_mode').value
+    const type = ctx.checkBody('type').value
 
     if (ctx.errors) {
       ctx.body = ctx.util.refail(null, 10001, ctx.errors)
@@ -182,8 +182,10 @@ module.exports = class MockController {
     api.url = url
     api.mode = mode
     api.method = method
+    api.type = type
     api.description = description
     api.useMockData = useMockData
+    api.confirm_mode = confirmMode
 
     const existMock = await MockProxy.findOne({
       _id: { $ne: api.id },
@@ -316,7 +318,6 @@ module.exports = class MockController {
       // 使用mock数据返回mock数据
       if (api.useMockData === true) {
         ctx.body = apiData
-        return false
       } else { // 不使用mock数据做原有链接的重定向
         var reg = /https?:\/\/[^/?]*/ // 匹配swagger后端服务器的域名
         try {
@@ -324,7 +325,9 @@ module.exports = class MockController {
             method: method,
             url: `${api.project.swagger_url.match(reg)[0]}${mockURL}`,
             params: _.assign({}, ctx.query),
-            headers: _.assign({}, ctx.headers),
+            headers: {
+              Cookie: ctx.headers.cookie
+            },
             data: body,
             timeout: 10000 // 接口转发时间最多10秒
           }).then(res => {

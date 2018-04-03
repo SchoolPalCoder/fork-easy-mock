@@ -167,6 +167,49 @@ export default {
         },
         { title: 'URL', width: 420, ellipsis: true, sortable: true, key: 'url' },
         { title: this.$t('p.detail.columns[0]'), ellipsis: true, key: 'description' },
+        { title: '接口状态',
+          key: 'syncStatus',
+          width: 100,
+          filters: [
+            { label: '已同步的接口', value: false },
+            { label: '不同步的接口', value: true },
+            { label: '自定义的接口', value: 0 }
+          ],
+          filterMethod (value, row) {
+            // 接口类型是swagger同步过来的接口 type 为1
+            if (row.type === 1) {
+              return !!row.confirm_mode === value
+            } else if (row.type === 0) {
+              return value === row.type
+            }
+          },
+          render: (h, params) => {
+            const getColorAndText = () => {
+              var color, text
+              // 未同步
+              if (params.row.type === 1 && params.row.confirm_mode) {
+                color = 'yellow'
+                text = '未同步'
+              }
+              if (params.row.type === 1 && !params.row.confirm_mode) {
+                color = 'green'
+                text = '已同步'
+              }
+              if (params.row.type === 0) {
+                color = 'default'
+                text = '自定义'
+              }
+              return {
+                color,
+                text
+              }
+            }
+
+            return <tag class="method-tag" color={getColorAndText().color}>
+              {getColorAndText().text}
+            </tag>
+          }
+        },
         { title: '使用mock',
           width: 110,
           align: 'center',
@@ -294,6 +337,8 @@ export default {
           description: mock.description,
           method: mock.method,
           useMockData: status,
+          confirm_mode: mock.confirm_mode,
+          type: mock.type,
           id: mock._id,
           url: mock.url
         }

@@ -1,5 +1,9 @@
 'use strict'
-
+/**
+ * swagger 同步diff工具方法
+ * 注释：by tianyu.chen
+ * 时间：2018年04月02日15:39:26
+ */
 /* eslint no-useless-escape: 0 */
 
 const _ = require('lodash')
@@ -43,6 +47,7 @@ async function createMock (projectId, swaggerDocs) {
         })
       )
 
+      // 同步时新增接口做新增操作
       /* istanbul ignore else */
       if (!api) {
         newAPIs.push({
@@ -50,6 +55,7 @@ async function createMock (projectId, swaggerDocs) {
           method,
           url: fullAPIPath,
           parameters,
+          type: 1, // type接口类型（1:swagger同步的接口)
           response_model: responseModel,
           description: desc,
           project: projectId
@@ -57,19 +63,24 @@ async function createMock (projectId, swaggerDocs) {
         continue
       }
 
+      // 下面是接口的differ操作
       // util.flatten({ cat: 'meow', dog: [{name: 'spot'}] }) => { 'cat': 'meow', 'dog[0]____name': 'spot' }
       let newKeys = Object.keys(util.flatten(JSON.parse(mode)))
       let oldKeys = Object.keys(util.flatten(JSON.parse(api.mode)))
 
       api.method = method
       api.url = fullAPIPath
+      api.type = 1 // type接口类型（1:swagger同步的接口)
       api.description = desc
       api.parameters = parameters
       api.response_model = responseModel
       newKeys = newKeys.filter(key => !/\[[1-9]\d*\]/.test(key))
       oldKeys = oldKeys.filter(key => !/\[[1-9]\d*\]/.test(key)) // [ 'data[0].item', 'data[1].item', 'data[2].item' ] => [ 'data[0]____item' ]
         .map(o => o.replace(/\|[^_\[]*(__)?/g, '$1')) // 'data|1-10.item' => 'data____item' 'data|1-10[0].item' => 'data[0]____item'
-      api.mode = _.xor(newKeys, oldKeys).length > 0 ? /* istanbul ignore next */ mode : api.mode // 同步后接口有变动，以新的接口结构为准，这里的变动主要为对象属性是否有删改，不关心值本身
+
+      // api.mode = _.xor(newKeys, oldKeys).length > 0 ? /* istanbul ignore next */ mode : api.mode // 同步后接口有变动，以新的接口结构为准，这里的变动主要为对象属性是否有删改，不关心值本身
+      // 接口有变动不再替换老的数据，而是将新的结果存入api.confirm_mode
+      api.confirm_mode = _.xor(newKeys, oldKeys).length > 0 ? mode : null
 
       oldAPIs.push(api)
     }
