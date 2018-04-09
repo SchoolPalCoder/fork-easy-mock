@@ -204,6 +204,10 @@ module.exports = class MockController {
     ctx.body = ctx.util.resuccess()
   }
 
+  static async updateMany (ctx) {
+
+  }
+
   /**
    * 获取 Mock 接口
    * @param {*} ctx
@@ -321,16 +325,18 @@ module.exports = class MockController {
       } else { // 不使用mock数据做原有链接的重定向
         var reg = /https?:\/\/[^/?]*/ // 匹配swagger后端服务器的域名
         try {
-          apiData = await axios({
+          let cfg = {
             method: method,
             url: `${api.project.swagger_url.match(reg)[0]}${mockURL}`,
             params: _.assign({}, ctx.query),
-            headers: {
-              Cookie: ctx.headers.cookie
-            },
+            headers: {},
             data: body,
             timeout: 10000 // 接口转发时间最多10秒
-          }).then(res => {
+          }
+
+          // 如果有cookie，设置cookie
+          ctx.headers.cookie && (cfg.headers.Cookie = ctx.headers.cookie)
+          apiData = await axios(cfg).then(res => {
             let cookies = res.headers['set-cookie']
             cookies && cookies.length && ctx.set('Set-Cookie', res.headers['set-cookie'])
             return res.data
