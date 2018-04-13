@@ -150,7 +150,8 @@ module.exports = class ProjectController {
       description: item.description,
       method: item.method,
       url: item.url,
-      mode: item.mode
+      mode: item.mode,
+      useMockData: item.useMockData
     }))
 
     await MockProxy.newAndSave(newAPIs)
