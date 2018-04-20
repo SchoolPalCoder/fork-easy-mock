@@ -9,6 +9,7 @@
 const _ = require('lodash')
 const path = require('path')
 const Mock = require('mockjs')
+const { VM } = require('vm2')
 const swaggerParserMock = require('swagger-parser-mock')
 
 const util = require('./')
@@ -66,7 +67,17 @@ async function createMock (projectId, swaggerDocs) {
       // 下面是接口的differ操作
       // util.flatten({ cat: 'meow', dog: [{name: 'spot'}] }) => { 'cat': 'meow', 'dog[0]____name': 'spot' }
       let newKeys = Object.keys(util.flatten(JSON.parse(mode)))
-      let oldKeys = Object.keys(util.flatten(JSON.parse(api.mode)))
+      // let oldKeys = Object.keys(util.flatten(JSON.parse(api.mode))) // 使用以下替代方法让json支持注释 和 同步swagger不出错
+      //  使用vm 是为了隔离外部恶意js代码的运行环境
+      const vm = new VM({
+        timeout: 1000,
+        sandbox: {
+          mode: api.mode,
+          template: new Function(`return ${api.mode}`) // eslint-disable-line
+        }
+      })
+
+      let oldKeys = Object.keys(util.flatten(vm.run('template()')))
 
       api.method = method
       api.url = fullAPIPath

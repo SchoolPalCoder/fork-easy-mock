@@ -263,7 +263,9 @@ export default {
       if (!this.value.confirm_mode) {
         return
       }
-      var left = JSON.parse(this.value.mode)
+      // var left = JSON.parse(this.value.mode)
+      var left = new Function(`return ${this.value.mode}`)() // eslint-disable-line
+      // var right = new Function(`return ${this.value.confirm_mode}`) // eslint-disable-line
       var right = JSON.parse(this.value.confirm_mode)
       var delta = jsondiffpatch.diff(left, right)
       return jsondiffpatch.formatters.html.format(delta, left)
