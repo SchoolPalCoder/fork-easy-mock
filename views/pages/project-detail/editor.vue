@@ -1,154 +1,14 @@
 <style>
-.jsondiffpatch-delta {
-    font-family: 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
-    font-size: 12px;
-    margin: 0;
-    padding: 0 0 0 12px;
-    display: inline-block;
-  }
-  .jsondiffpatch-delta pre {
-    font-family: 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
-    font-size: 12px;
-    margin: 0;
-    padding: 0;
-    display: inline-block;
-  }
-  ul.jsondiffpatch-delta {
-    list-style-type: none;
-    padding: 0 0 0 20px;
-    margin: 0;
-  }
-  .jsondiffpatch-delta ul {
-    list-style-type: none;
-    padding: 0 0 0 20px;
-    margin: 0;
-  }
-  .jsondiffpatch-added .jsondiffpatch-property-name,
-  .jsondiffpatch-added .jsondiffpatch-value pre,
-  .jsondiffpatch-modified .jsondiffpatch-right-value pre,
-  .jsondiffpatch-textdiff-added {
-    background: #bbffbb;
-  }
-  .jsondiffpatch-deleted .jsondiffpatch-property-name,
-  .jsondiffpatch-deleted pre,
-  .jsondiffpatch-modified .jsondiffpatch-left-value pre,
-  .jsondiffpatch-textdiff-deleted {
-    background: #ffbbbb;
-    text-decoration: line-through;
-  }
-  .jsondiffpatch-unchanged,
-  .jsondiffpatch-movedestination {
-    color: gray;
-  }
-  .jsondiffpatch-unchanged,
-  .jsondiffpatch-movedestination > .jsondiffpatch-value {
-    transition: all 0.5s;
-    -webkit-transition: all 0.5s;
-    overflow-y: hidden;
-  }
-  .jsondiffpatch-unchanged-showing .jsondiffpatch-unchanged,
-  .jsondiffpatch-unchanged-showing .jsondiffpatch-movedestination > .jsondiffpatch-value {
-    max-height: 100px;
-  }
-  .jsondiffpatch-unchanged-hidden .jsondiffpatch-unchanged,
-  .jsondiffpatch-unchanged-hidden .jsondiffpatch-movedestination > .jsondiffpatch-value {
-    max-height: 0;
-  }
-  .jsondiffpatch-unchanged-hiding .jsondiffpatch-movedestination > .jsondiffpatch-value,
-  .jsondiffpatch-unchanged-hidden .jsondiffpatch-movedestination > .jsondiffpatch-value {
-    display: block;
-  }
-  .jsondiffpatch-unchanged-visible .jsondiffpatch-unchanged,
-  .jsondiffpatch-unchanged-visible .jsondiffpatch-movedestination > .jsondiffpatch-value {
-    max-height: 100px;
-  }
-  .jsondiffpatch-unchanged-hiding .jsondiffpatch-unchanged,
-  .jsondiffpatch-unchanged-hiding .jsondiffpatch-movedestination > .jsondiffpatch-value {
-    max-height: 0;
-  }
-  .jsondiffpatch-unchanged-showing .jsondiffpatch-arrow,
-  .jsondiffpatch-unchanged-hiding .jsondiffpatch-arrow {
-    display: none;
-  }
-  .jsondiffpatch-value {
-    display: inline-block;
-  }
-  .jsondiffpatch-property-name {
-    display: inline-block;
-    padding-right: 5px;
-    vertical-align: top;
-  }
-  .jsondiffpatch-property-name:after {
-    content: ': ';
-  }
-  .jsondiffpatch-child-node-type-array > .jsondiffpatch-property-name:after {
-    content: ': [';
-  }
-  .jsondiffpatch-child-node-type-array:after {
-    content: '],';
-  }
-  div.jsondiffpatch-child-node-type-array:before {
-    content: '[';
-  }
-  div.jsondiffpatch-child-node-type-array:after {
-    content: ']';
-  }
-  .jsondiffpatch-child-node-type-object > .jsondiffpatch-property-name:after {
-    content: ': {';
-  }
-  .jsondiffpatch-child-node-type-object:after {
-    content: '},';
-  }
-  div.jsondiffpatch-child-node-type-object:before {
-    content: '{';
-  }
-  div.jsondiffpatch-child-node-type-object:after {
-    content: '}';
-  }
-  .jsondiffpatch-value pre:after {
-    content: ',';
-  }
-  li:last-child > .jsondiffpatch-value pre:after,
-  .jsondiffpatch-modified > .jsondiffpatch-left-value pre:after {
-    content: '';
-  }
-  .jsondiffpatch-modified .jsondiffpatch-value {
-    display: inline-block;
-  }
-  .jsondiffpatch-modified .jsondiffpatch-right-value {
-    margin-left: 5px;
-  }
-  .jsondiffpatch-moved .jsondiffpatch-value {
-    display: none;
-  }
-  .jsondiffpatch-moved .jsondiffpatch-moved-destination {
-    display: inline-block;
-    background: #ffffbb;
-    color: #888;
-  }
-  .jsondiffpatch-moved .jsondiffpatch-moved-destination:before {
-    content: ' => ';
-  }
-  ul.jsondiffpatch-textdiff {
-    padding: 0;
-  }
-  .jsondiffpatch-textdiff-location {
-    color: #bbb;
-    display: inline-block;
-    min-width: 60px;
-  }
-  .jsondiffpatch-textdiff-line {
-    display: inline-block;
-  }
-  .jsondiffpatch-textdiff-line-number:after {
-    content: ',';
-  }
-  .jsondiffpatch-error {
-    background: red;
-    color: white;
-    font-weight: bold;
-  }
-  
+.diff del{
+  text-decoration: none;
+  color: #b30000;
+  background: #fadad7;
+}
+.diff ins{
+    background: #eaf2c2;
+    color: #406619;
+    text-decoration: none;
+}
 </style>
 
 
@@ -199,14 +59,14 @@
         </div>
       </div>
       <!-- 解决冲突弹窗 -->
-      <Modal
+      <Modal class="diff"
         v-model="state.isModalShow"
         title="选择以变动为准后记得要更新，才能生效哦~"
         ok-text="以变动为准"
         cancel-text="不做变更"
         @on-ok="confirmConflict"
         :closable="false">
-        <div v-html="diffedHtml"></div>
+        <pre v-html="html"></pre>
       </Modal>
     </div>
   </transition>
@@ -215,7 +75,7 @@
 <script>
 import * as api from '../../api'
 import jsBeautify from 'js-beautify/js/lib/beautify'
-const jsondiffpatch = require('jsondiffpatch')
+const jsdiff = require('diff')
 let ace
 
 if (typeof window !== 'undefined') {
@@ -252,23 +112,13 @@ export default {
       },
       state: {
         isModalShow: false
-      }
+      },
+      html: ''
     }
   },
   computed: {
     isEdit () {
       return !!this.value._id
-    },
-    diffedHtml () {
-      if (!this.value.confirm_mode) {
-        return
-      }
-      // var left = JSON.parse(this.value.mode)
-      var left = new Function(`return ${this.value.mode}`)() // eslint-disable-line
-      // var right = new Function(`return ${this.value.confirm_mode}`) // eslint-disable-line
-      var right = JSON.parse(this.value.confirm_mode)
-      var delta = jsondiffpatch.diff(left, right)
-      return jsondiffpatch.formatters.html.format(delta, left)
     }
   },
   mounted () {
@@ -296,6 +146,7 @@ export default {
       if (show) {
         // 编辑接口时
         if (this.isEdit) {
+          this.diffedHtml()
           this.autoClose = true
           this.showConfirmStatus = !!this.value.confirm_mode
           this.userResolvedConflict = false
@@ -414,6 +265,41 @@ export default {
       this.userResolvedConflict = true
       this.temp.mode = this.value.confirm_mode
       this.codeEditor.setValue(this.temp.mode)
+    },
+    diffedHtml () {
+      if (!this.value.confirm_mode) {
+        return
+      }
+
+      // var left = new Function(`return ${this.value.mode}`)() // eslint-disable-line
+      // var right = JSON.parse(this.value.confirm_mode)
+      // var delta = jsondiffpatch.diff(left, right)
+      // return jsondiffpatch.formatters.html.format(delta, left)
+      var div = document.createElement('pre')
+      var left = `${this.value.mode}`
+      var right = `${this.value.confirm_mode}`
+      var diff = jsdiff['diffLines'](left, right)
+
+      for (var i = 0; i < diff.length; i++) {
+        if (diff[i].added && diff[i + 1] && diff[i + 1].removed) {
+          var swap = diff[i]
+          diff[i] = diff[i + 1]
+          diff[i + 1] = swap
+        }
+
+        var node
+        if (diff[i].removed) {
+          node = document.createElement('del')
+          node.appendChild(document.createTextNode(diff[i].value))
+        } else if (diff[i].added) {
+          node = document.createElement('ins')
+          node.appendChild(document.createTextNode(diff[i].value))
+        } else {
+          node = document.createTextNode(diff[i].value)
+        }
+        div.appendChild(node)
+      }
+      this.html = div.innerHTML
     }
   }
 }
