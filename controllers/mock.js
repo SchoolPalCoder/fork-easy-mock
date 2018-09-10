@@ -327,15 +327,23 @@ module.exports = class MockController {
         try {
           let cfg = {
             method: method,
-            url: `${api.project.swagger_url.match(reg)[0]}${mockURL}`,
+            url: api.project.swagger_url ? `${api.project.swagger_url.match(reg)[0]}${mockURL}` : '',
             params: _.assign({}, ctx.query),
-            headers: {},
+            headers: ctx.headers,
             data: body,
             timeout: 10000 // 接口转发时间最多10秒
           }
 
-          // 如果有cookie，设置cookie
-          ctx.headers.cookie && (cfg.headers.Cookie = ctx.headers.cookie)
+          delete cfg.headers.host // fix 404
+          delete cfg.headers['content-type'] // fix content-type 非json报错的问题
+
+          if (!cfg.url) { ctx.body = ctx.util.refail('骚年，swagger地址忘记填了吧？这样请求接口当然报错呀'); return }
+
+          // // 如果有cookie，设置cookie
+          // ctx.headers.cookie && (cfg.headers.Cookie = ctx.headers.cookie)
+          // // 如果有token 带上 token
+          // ctx.headers.token && (cfg.headers.token = ctx.headers.token)
+
           apiData = await axios(cfg).then(res => {
             let cookies = res.headers['set-cookie']
             cookies && cookies.length && ctx.set('Set-Cookie', res.headers['set-cookie'])
